@@ -4,7 +4,7 @@ import (
 	"errors"
 	"log"
 
-	lib "github.com/chrispruitt/ecs-power/lib"
+	"github.com/chrispruitt/ecs-power/lib"
 
 	"github.com/aws/aws-lambda-go/lambda"
 )
