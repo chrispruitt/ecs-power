@@ -1,8 +1,9 @@
 package ld
 
 import (
+	"encoding/json"
 	"errors"
-	"log"
+	"fmt"
 
 	"github.com/chrispruitt/ecs-power/lib"
 
@@ -13,35 +14,56 @@ var (
 	ErrInvalidInputProvided = errors.New("invalid input - ensure \"Cluster\" and \"Power\" is provided\"")
 )
 
-type InputOpts struct {
+type PowerInput struct {
 	Cluster string
 	Power   string
+}
+
+type PowerOutput struct {
+	Success bool
 }
 
 func Start() {
 	lambda.Start(Handler)
 }
 
-func Handler(inputOpts InputOpts) (err error) {
-
-	if inputOpts.Cluster == "" {
-		return ErrInvalidInputProvided
+func Handler(powerInput PowerInput) (s string, err error) {
+	var powerOutput PowerOutput
+	if !inputValidation(powerInput) {
+		return s, ErrInvalidInputProvided
 	}
 
-	if inputOpts.Power != "OFF" && inputOpts.Power != "ON" {
-		return ErrInvalidInputProvided
-	}
+	fmt.Printf("Update autoscaling requested for group: %v\n", powerInput.Cluster)
 
-	log.Printf("Update autoscaling requested for group: %v\n", inputOpts.Cluster)
-
-	switch inputOpts.Power {
+	switch powerInput.Power {
 	case "ON":
-		lib.PowerOn(inputOpts.Cluster)
+		err = lib.PowerOn(powerInput.Cluster)
 	case "OFF":
-		lib.PowerOff(inputOpts.Cluster)
+		err = lib.PowerOff(powerInput.Cluster)
 	default:
-		panic("Invalid input for Power. Must be \"ON\" or \"OFF\".")
+		fmt.Println("Invalid input for Power. Must be \"ON\" or \"OFF\".")
 	}
 
-	return nil
+	if err != nil {
+		return s, err
+	}
+
+	powerOutput.Success = true
+
+	res, err := json.Marshal(powerOutput)
+	s = string(res)
+
+	return s, err
+}
+
+func inputValidation(powerInput PowerInput) bool {
+	if powerInput.Cluster == "" {
+		return false
+	}
+
+	if powerInput.Power != "OFF" && powerInput.Power != "ON" {
+		return false
+	}
+
+	return true
 }

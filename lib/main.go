@@ -17,16 +17,16 @@ var (
 	}))
 )
 
-func PowerOn(cluster string) {
+func PowerOn(cluster string) error {
 	min, max, desired := getAutoScaleValues(cluster)
-	scaleCluster(cluster, min, max, desired)
+	return scaleCluster(cluster, min, max, desired)
 }
 
-func PowerOff(cluster string) {
-	scaleCluster(cluster, 0, 0, 0)
+func PowerOff(cluster string) error {
+	return scaleCluster(cluster, 0, 0, 0)
 }
 
-func scaleCluster(cluster string, min, max, desired int64) {
+func scaleCluster(cluster string, min, max, desired int64) error {
 	autoScalingGroupName := cluster + "-ecs"
 	fmt.Printf("Updating autoscaling group \"%v\" desired: %v, min: %v, max: %v\n", autoScalingGroupName, desired, min, max)
 
@@ -56,8 +56,9 @@ func scaleCluster(cluster string, min, max, desired int64) {
 		} else {
 			fmt.Println(err.Error())
 		}
+		return err
 	}
-	fmt.Println("Done.")
+	return nil
 }
 
 func getAutoScaleValues(cluster string) (int64, int64, int64) {
