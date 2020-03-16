@@ -9,7 +9,6 @@ import (
 	"github.com/spf13/cobra"
 )
 
-// Run Command ./pentaho-cli run
 var offCmd = &cobra.Command{
 	Use:   "off",
 	Short: "Scale cluster down",

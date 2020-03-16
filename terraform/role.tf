@@ -9,7 +9,8 @@ data "aws_iam_policy_document" "lambda_policy_doc" {
       "logs:PutLogEvents",
       "ssm:Get*",
       "ec2:RunInstances",
-      "autoscaling:UpdateAutoScalingGroup"
+      "autoscaling:UpdateAutoScalingGroup",
+      "autoscaling:DescribeAutoScalingGroups"
     ]
     resources = ["*"]
   }

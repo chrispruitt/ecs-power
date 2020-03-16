@@ -26,6 +26,41 @@ func PowerOff(cluster string) error {
 	return scaleCluster(cluster, 0, 0, 0)
 }
 
+func Status(cluster string) ([]*autoscaling.Group, error) {
+
+	var autoScaleService = autoscaling.New(sess)
+
+	input := &autoscaling.DescribeAutoScalingGroupsInput{}
+
+	if cluster != "" {
+		input.AutoScalingGroupNames = aws.StringSlice([]string{cluster + "-ecs"})
+	}
+
+	groups := make([]*autoscaling.Group, 0)
+
+	for true {
+		result, err := autoScaleService.DescribeAutoScalingGroups(input)
+
+		if err != nil {
+			if aerr, ok := err.(awserr.Error); ok {
+				fmt.Println(aerr.Error())
+			} else {
+				fmt.Println(err.Error())
+			}
+			return nil, err
+		}
+
+		groups = append(groups, result.AutoScalingGroups...)
+
+		if result.NextToken == nil {
+			break
+		} else {
+			input.NextToken = result.NextToken
+		}
+	}
+	return groups, nil
+}
+
 func scaleCluster(cluster string, min, max, desired int64) error {
 	autoScalingGroupName := cluster + "-ecs"
 	fmt.Printf("Updating autoscaling group \"%v\" desired: %v, min: %v, max: %v\n", autoScalingGroupName, desired, min, max)

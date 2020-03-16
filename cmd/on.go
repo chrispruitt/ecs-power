@@ -9,7 +9,6 @@ import (
 	"github.com/spf13/cobra"
 )
 
-// Run Command ./pentaho-cli run
 var onCmd = &cobra.Command{
 	Use:   "on",
 	Short: "Scale ecs cluster up based on preset ssm parameter auto scale values",
